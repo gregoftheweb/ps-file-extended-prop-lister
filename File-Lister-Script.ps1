@@ -99,12 +99,35 @@ function Get-FileMetaData
 #>
 if($args.count -gt 0){
 	if($args.count -gt 2){		
-		if($args[2] -eq '-s'){
+		if($args[2] -eq '-s' -Or $args[2] -eq 'simple'){
 			# simple output -s
 			# exaample: .\File-Lister-Script.ps1 C:\ myFileList.csv -s
 			
 			Write-Host "Start ==> Simple Flag ==>"
-			Get-ChildItem -Path $args[0]  -File | Select PSChildName,LastWriteTime | Export-Csv $args[1]
+			if($args[3] -eq '-r' -Or $args[3] -eq 'recurse'){
+				Write-Host "-Recurse"
+				Get-ChildItem -Path $args[0] -Recurse -File | Select PSChildName,LastWriteTime | Export-Csv $args[1]
+			}else{
+				Get-ChildItem -Path $args[0] -File | Select PSChildName,LastWriteTime | Export-Csv $args[1]
+			}		
+			
+			
+
+			
+		}elseif($args[2] -eq '-d' -Or $args[2] -eq 'dir'){
+			# directory list - good for listing albums of music
+			# exaample: .\File-Lister-Script.ps1 C:\ myFileList.csv -d
+			
+			
+			Write-Host "Start ==> directory listing ==>"
+			if($args[3] -eq '-r' -Or $args[3] -eq 'recurse'){
+				Write-Host "-Recurse"
+				Get-ChildItem -Path $args[0] -Recurse -Directory | Select Parent, Name, PSChildName,LastWriteTime | Export-Csv $args[1]
+			}else{
+				Get-ChildItem -Path $args[0] -Directory | Select Parent, Name, PSChildName,LastWriteTime | Export-Csv $args[1]
+			}		
+			
+
 			
 		}else{	
 			# passed in list of Extended Properties
@@ -130,10 +153,32 @@ if($args.count -gt 0){
 		Get-ChildItem -Path $args[0] -File | foreach {Get-FileMetaData -File $_.FullName | Select Name,Rating,Length} | Export-Csv $args[1]
 			
 	}else{
-		#catch weirdness
 		
-		Write-Host "Start ==> Implicit simple ==>"
-		Get-ChildItem -Path $args[0]  -File | Select PSChildName,LastWriteTime | Export-Csv $args[1]
+		if($args[0] -eq '-h' -Or $args[0] -eq 'help'){
+			Write-Host "How to use this script:"
+			Write-Host "1. Just the default movie list with no parameters:"
+			Write-Host "     >.\File-Lister-Script.ps1"
+			Write-Host "     This will create the simplest default csv file and save it in the default location.  Quick and dirty."
+			Write-Host "     You can go edit the file and change the default locations."
+			Write-Host ""
+			Write-Host "2. Specify the Folder to look at and the file to save it."
+			Write-Host "     >.\File-Lister-Script.ps1 C:\myFolder myFileList.csv"
+			Write-Host "     This will look in the folder myFolder and output the file named myFileList.csv"
+			Write-Host "     It actually adds the extended fields - Rating and Length... but you can change those in the script if you want"
+			Write-Host ""
+			Write-Host "3. Specify folder, filename and Extended properties you want in the CSV"
+			Write-Host "     >.\File-Lister-Script.ps1 C:\ myFileList.csv Rating Length Size"
+			Write-Host "     This example has three fields Rating Length and Size, but you can add any you want."
+			Write-Host ""
+			
+			
+		}else{
+			#catch weirdness
+		
+			Write-Host "Start ==> Implicit simple ==>"
+			Get-ChildItem -Path $args[0]  -File | Select PSChildName,LastWriteTime | Export-Csv $args[1]
+				
+			}	
 	}	
 	
 }
